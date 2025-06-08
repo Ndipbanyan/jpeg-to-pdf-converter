@@ -4,38 +4,48 @@ import Preview from './components/Preview'
 import ConvertButton from './components/ConvertButton'
 
 function App() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [previewUrls, setPreviewUrls] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
-  const handleFileSelect = (file: File) => {
-    setSelectedFile(file)
+  const handleFileSelect = (files: File[]) => {
+    setSelectedFiles(files)
     setError(null)
-    const url = URL.createObjectURL(file)
-    setPreviewUrl(url)
+    const urls = files.map(file => URL.createObjectURL(file))
+    setPreviewUrls(urls)
   }
 
   const handleConvert = async () => {
-    if (!selectedFile) return
+    if (selectedFiles.length === 0) return
 
     try {
       setError(null)
       const { jsPDF } = await import('jspdf')
       const pdf = new jsPDF()
       
-      const img = new Image()
-      img.src = previewUrl!
-      
-      img.onload = () => {
-        const imgProps = pdf.getImageProperties(img)
-        const pdfWidth = pdf.internal.pageSize.getWidth()
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const img = new Image()
+        img.src = previewUrls[i]
         
-        pdf.addImage(img, 'JPEG', 0, 0, pdfWidth, pdfHeight)
-        pdf.save('converted-image.pdf')
+        await new Promise((resolve) => {
+          img.onload = () => {
+            const imgProps = pdf.getImageProperties(img)
+            const pdfWidth = pdf.internal.pageSize.getWidth()
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width
+            
+            if (i > 0) {
+              pdf.addPage()
+            }
+            
+            pdf.addImage(img, 'JPEG', 0, 0, pdfWidth, pdfHeight)
+            resolve(null)
+          }
+        })
       }
+      
+      pdf.save('converted-images.pdf')
     } catch (error) {
-      setError('Failed to convert image to PDF. Please try again.')
+      setError('Failed to convert images to PDF. Please try again.')
       console.error('Error converting to PDF:', error)
     }
   }
@@ -65,9 +75,9 @@ function App() {
               </div>
             )}
 
-            {previewUrl && (
+            {previewUrls.length > 0 && (
               <div className="space-y-4">
-                <Preview imageUrl={previewUrl} />
+                <Preview imageUrls={previewUrls} />
                 <ConvertButton onConvert={handleConvert} />
               </div>
             )}
