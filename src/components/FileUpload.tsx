@@ -5,12 +5,14 @@ interface FileUploadProps {
 const FileUpload = ({ onFileSelect }: FileUploadProps) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
-    const jpegFiles = files.filter(file => file.type === 'image/jpeg')
+    const imageFiles = files.filter(file => 
+      file.type === 'image/jpeg' || file.type === 'image/png'
+    )
     
-    if (jpegFiles.length > 0) {
-      onFileSelect(jpegFiles)
+    if (imageFiles.length > 0) {
+      onFileSelect(imageFiles)
     } else {
-      alert('Please select JPEG files')
+      alert('Please select JPEG or PNG files')
     }
   }
 
@@ -41,16 +43,16 @@ const FileUpload = ({ onFileSelect }: FileUploadProps) => {
           <p className="mb-2 text-sm text-muted">
             <span className="font-semibold">Click to upload</span> or drag and drop
           </p>
-          <p className="text-xs text-muted">JPEG files only (multiple files supported)</p>
+          <p className="text-xs text-muted">JPEG and PNG files (multiple files supported)</p>
         </div>
         <input
           id="file-upload"
           type="file"
           className="sr-only"
-          accept=".jpg,.jpeg"
+          accept=".jpg,.jpeg,.png"
           multiple
           onChange={handleFileChange}
-          aria-label="Upload JPEG files"
+          aria-label="Upload JPEG or PNG files"
         />
       </label>
     </div>

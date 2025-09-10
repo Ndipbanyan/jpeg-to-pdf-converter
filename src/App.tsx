@@ -37,7 +37,9 @@ function App() {
               pdf.addPage()
             }
             
-            pdf.addImage(img, 'JPEG', 0, 0, pdfWidth, pdfHeight)
+            // Determine format based on file type
+            const format = selectedFiles[i].type === 'image/png' ? 'PNG' : 'JPEG'
+            pdf.addImage(img, format, 0, 0, pdfWidth, pdfHeight)
             resolve(null)
           }
         })
@@ -56,10 +58,10 @@ function App() {
         <div className="card p-6 sm:p-8 max-w-2xl mx-auto">
           <header className="mb-8">
             <h1 className="text-3xl font-bold text-center text-foreground">
-              JPEG to PDF Converter
+              Image to PDF Converter
             </h1>
             <p className="text-center text-muted mt-2">
-              Convert your JPEG images to PDF format easily
+              Convert your JPEG and PNG images to PDF format easily
             </p>
           </header>
 
